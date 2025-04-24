@@ -206,7 +206,9 @@ p()
 
 
 
-selectInput('valuecard1', label = 'Valuecard 1', choice = 'Percent') 
+selectInput('valuecard1', label = 'Valuecard 1', 
+            choice = c('Percentage', 'Proportion'),
+            multiple = FALSE, selected = 'Percentage') 
 
 
 ```
@@ -339,14 +341,23 @@ want_to_know_more_science = wgm2018_full_new2 %>%
 
 
 output$myvaluebox <- renderUI({
-  value_box(
-    title = "Title",
-    value = 5
+  
+  if (input$valuecard1 == "Percentage")
+    v = value_box(theme_color = "success",
+      title = "Want To Learn More About Science",
+      value = paste(round(want_to_know_more_science * 100,2), '%'),
+      showcase_layout = showcase_top_right(max_height = "100px"))
     
-  )
+ 
+  
+  if (input$valuecard1 == "Proportion")
+    v = value_box(theme_color = "success",
+      title = "Want To Learn More About Science",
+      value = round(want_to_know_more_science,4),
+      showcase_layout = showcase_top_right(max_height = "100px"))
   
   
-  
+  v
 })
 
 ```
