@@ -202,6 +202,13 @@ br()
 p()
 #checkboxInput('jitter', 'Jitter')
 #checkboxInput('smooth', 'Smooth')
+
+
+
+
+selectInput('valuecard1', label = 'Valuecard 1', choice = 'Percent') 
+
+
 ```
 
 
@@ -224,8 +231,15 @@ p()
 
 #https://rstudio.github.io/leaflet/articles/shiny.html
 leafletOutput('mymap')
-leafletOutput('mymap2')
 ```
+
+
+```{r}
+#| context: setup
+
+uiOutput('myvaluebox')
+```
+
 
 ```{r}
 #| context: server
@@ -298,7 +312,12 @@ observe({
 
 ### Row {height="25%"}
 
+
+
+
+
 ```{r}
+#| context: setup
 #| label: valueboxes_prep
 
 
@@ -308,48 +327,26 @@ want_to_know_more_science = wgm2018_full_new2 %>%
   select(prop)
 
 
-want_to_know_more_disease = wgm2018_full_new2 %>% 
-  count(Q9) %>% mutate(prop = prop.table(n)) %>% 
-  filter(Q9 == '1') %>% 
-  select(prop)
-
-disease_part_of_science = wgm2018_full_new2 %>% 
-  count(Q3) %>% mutate(prop = prop.table(n)) %>% 
-  filter(Q3 == '1') %>% 
-  select(prop)
-
 ```
+
 
 
 
 ```{r}
-value_box(
-  title = "Want To Learn More About Science",
-  value = paste(round(want_to_know_more_science*100,1), "%"),
-  theme_color = "success",
-  showcase_layout = showcase_top_right(max_height = "100px")
-)  
-```
+#| context: server
 
 
 
-```{r}
-value_box(
-  title = "Want To Learn More About Disease",
-  value = paste(round(want_to_know_more_disease*100,1), "%"),
-  theme_color = "info",
-  showcase_layout = showcase_top_right(max_height = "100px")
-)  
-```
 
-```{r}
-value_box(
-  title = "Believe Diseases are a Part of Science",
-  value = paste(round(disease_part_of_science*100,1), "%"),
-  theme_color = "light",
-  showcase_layout = showcase_top_right(max_height = "100px")
-)  
+output$myvaluebox <- renderUI({
+  value_box(
+    title = "Title",
+    value = 5
+    
+  )
+  
+  
+  
+})
 
 ```
-
-
