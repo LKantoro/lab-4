@@ -3,7 +3,7 @@ title: "Lucas Kantorowski"
 format: 
   dashboard:
     orientation: columns
-    theme: vapor
+    theme: Minty
     nav-buttons:
       - icon: github
         href: https://github.com/LKantoro/lab-3
@@ -111,9 +111,6 @@ countries_and_regions = wgm2018_full_new2 %>%
 
 
 
-
-
-
 ```{r}
 #| context: setup
 #| label: chloropleth_prep_1
@@ -177,11 +174,6 @@ chloroplethdf = st_sf(chloroplethdf)
 
 
 
-
-
-
-
-
 # Science vs. Vaccines
 
 ## {.sidebar width="200px"}
@@ -189,17 +181,38 @@ chloroplethdf = st_sf(chloroplethdf)
 ```{r}
 #| context: setup
 
-selectInput('valuecard', label = 'Valuecards', 
-            choice = c('Percentage', 'Proportion'),
-            multiple = FALSE, selected = 'Percentage')
+selectInput('valuecard1', label = 'Valuecard 1', 
+            choice = c('More About Science', 
+                       'More About Disease',
+                       'Diseases a Part of Science', 
+                       'Science at Primary School', 
+                       'Science at Secondary School',
+                       'Science at College/University'),
+            multiple = FALSE, selected = 'More About Science')
+
+selectInput('valuecard2', label = 'Valuecard 2', 
+            choice = c('More About Science', 
+                       'More About Disease',
+                       'Diseases a Part of Science', 
+                       'Science at Primary School', 
+                       'Science at Secondary School',
+                       'Science at College/University'),
+            multiple = FALSE, selected = 'More About Disease')
+
+selectInput('valuecard3', label = 'Valuecard 3', 
+            choice = c('More About Science', 
+                       'More About Disease',
+                       'Diseases a Part of Science', 
+                       'Science at Primary School', 
+                       'Science at Secondary School',
+                       'Science at College/University'),
+            multiple = FALSE, selected = 'Diseases a Part of Science')
 ```
 
 
-## Column - Plots {width="50%"}
+## Column - Plots {width="60%"}
 
 ### Row {height="75%"}
-
-
 
 ```{r}
 #| label: plotly_prep_1
@@ -291,7 +304,6 @@ Vaccine Effectiveness: %{y}
 #| context: setup
 
 uiOutput('myvaluebox1')
-
 ```
 
 
@@ -299,7 +311,6 @@ uiOutput('myvaluebox1')
 #| context: setup
 
 uiOutput('myvaluebox2')
-
 ```
 
 ```{r}
@@ -329,74 +340,204 @@ disease_part_of_science = wgm2018_full_new2 %>%
   filter(Q3 == '1') %>% 
   select(prop)
 
+
+science_primary_school = wgm2018_full_new2 %>% 
+  count(Q5A) %>% mutate(prop = prop.table(n)) %>% 
+  filter(Q5A == '1') %>% 
+  select(prop)
+
+science_secondary_school = wgm2018_full_new2 %>% 
+  count(Q5B) %>% mutate(prop = prop.table(n)) %>% 
+  filter(Q5B == '1') %>% 
+  select(prop)
+
+science_college = wgm2018_full_new2 %>% 
+  count(Q5C) %>% mutate(prop = prop.table(n)) %>% 
+  filter(Q5C == '1') %>% 
+  select(prop)
+
+
 ```
-
-
 
 
 ```{r}
 #| context: server
+
+#changing font size of valuebox text: 
+#https://www.edureka.co/community/32147/change-font-size-of-valuebox-shiny-r
+
+
+
 
 
 output$myvaluebox1 <- renderUI({
   
-  if (input$valuecard == "Percentage")
-    v = value_box(theme_color = "success",
+  if (input$valuecard1 == 'More About Science')
+    v = value_box(
+      theme = "info",
       title = "Want To Learn More About Science",
-      value = paste(round(want_to_know_more_science * 100,2), '%'),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      value = tags$p(paste(round(want_to_know_more_science * 100,0), '%'),
+                     style = "font-size: 300%;")
+      )
  
   
-  if (input$valuecard == "Proportion")
-    v = value_box(theme_color = "success",
-      title = "Want To Learn More About Science",
-      value = round(want_to_know_more_science,4),
+  if (input$valuecard1 == 'More About Disease')
+    v = value_box(
+      theme = "info",
+      title = "Want To Learn More About Disease",
+      value = tags$p(paste(round(want_to_know_more_disease * 100,0), '%'),
+                     style = "font-size: 300%;"),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+  
+  if (input$valuecard1 == 'Diseases a Part of Science')
+    v = value_box(
+      theme = "info",
+      title = "Believe Diseases are a Part of Science",
+      value = tags$p(paste(round(disease_part_of_science * 100,0), '%'),
+                     style = "font-size: 300%;")
+      )
+ 
+  
+  if (input$valuecard1 == 'Science at Primary School')
+    v = value_box(
+      theme = "info",
+      title = "Learned About Science at Primary School",
+      value = tags$p(paste(round(science_primary_school * 100,0), '%'),
+                     style = "font-size: 300%;"),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+  
+  if (input$valuecard1 == 'Science at Secondary School')
+    v = value_box(
+      theme = "info",
+      title = "Learned About Science at Secondary School",
+      value = tags$p(paste(round(science_secondary_school * 100,0), '%'),
+                     style = "font-size: 300%;")
+      )
+ 
+  
+  if (input$valuecard1 == 'Science at College/University')
+    v = value_box(
+      theme = "info",
+      title = "Learned About Science at College/University",
+      value = tags$p(paste(round(science_college * 100,0), '%'),
+                     style = "font-size: 300%;"),
       showcase_layout = showcase_top_right(max_height = "100px"))
     
   v
   
 })
-```
 
-```{r}
-#| context: server
+
 
 output$myvaluebox2 <- renderUI({
   
-  if (input$valuecard == "Percentage")
-    v = value_box(theme_color = "success",
+  if (input$valuecard2 == 'More About Science')
+    v = value_box(
+      theme = "success",
       title = "Want To Learn More About Science",
-      value = paste(round(want_to_know_more_science * 100,2), '%'),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      value = tags$p(paste(round(want_to_know_more_science * 100,0), '%'),
+                     style = "font-size: 300%;")
+      )
  
   
-  if (input$valuecard == "Proportion")
-    v = value_box(theme_color = "success",
-      title = "Want To Learn More About Science",
-      value = round(want_to_know_more_science,4),
+  if (input$valuecard2 == 'More About Disease')
+    v = value_box(
+      theme = "success",
+      title = "Want To Learn More About Disease",
+      value = tags$p(paste(round(want_to_know_more_disease * 100,0), '%'),
+                     style = "font-size: 300%;"),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+  
+  if (input$valuecard2 == 'Diseases a Part of Science')
+    v = value_box(
+      theme = "success",
+      title = "Believe Diseases are a Part of Science",
+      value = tags$p(paste(round(disease_part_of_science * 100,0), '%'),
+                     style = "font-size: 300%;")
+      )
+ 
+  
+  if (input$valuecard2 == 'Science at Primary School')
+    v = value_box(
+      theme = "success",
+      title = "Learned About Science at Primary School",
+      value = tags$p(paste(round(science_primary_school * 100,0), '%'),
+                     style = "font-size: 300%;"),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+  
+  if (input$valuecard2 == 'Science at Secondary School')
+    v = value_box(
+      theme = "success",
+      title = "Learned About Science at Secondary School",
+      value = tags$p(paste(round(science_secondary_school * 100,0), '%'),
+                     style = "font-size: 300%;")
+      )
+ 
+  
+  if (input$valuecard2 == 'Science at College/University')
+    v = value_box(
+      theme = "success",
+      title = "Learned About Science at College/University",
+      value = tags$p(paste(round(science_college * 100,0), '%'),
+                     style = "font-size: 300%;"),
       showcase_layout = showcase_top_right(max_height = "100px"))
     
   v
   
 })
-```
 
-```{r}
-#| context: server
 
 output$myvaluebox3 <- renderUI({
   
-  if (input$valuecard == "Percentage")
-    v = value_box(theme_color = "success",
+  if (input$valuecard3 == 'More About Science')
+    v = value_box(
+      theme = "light",
       title = "Want To Learn More About Science",
-      value = paste(round(want_to_know_more_science * 100,2), '%'),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      value = tags$p(paste(round(want_to_know_more_science * 100,0), '%'),
+                     style = "font-size: 300%;")
+      )
  
   
-  if (input$valuecard == "Proportion")
-    v = value_box(theme_color = "success",
-      title = "Want To Learn More About Science",
-      value = round(want_to_know_more_science,4),
+  if (input$valuecard3 == 'More About Disease')
+    v = value_box(
+      theme = "light",
+      title = "Want To Learn More About Disease",
+      value = tags$p(paste(round(want_to_know_more_disease * 100,0), '%'),
+                     style = "font-size: 300%;"),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+  
+  if (input$valuecard3 == 'Diseases a Part of Science')
+    v = value_box(
+      theme = "light",
+      title = "Believe Diseases are a Part of Science",
+      value = tags$p(paste(round(disease_part_of_science * 100,0), '%'),
+                     style = "font-size: 300%;")
+      )
+ 
+  
+  if (input$valuecard3 == 'Science at Primary School')
+    v = value_box(
+      theme = "light",
+      title = "Learned About Science at Primary School",
+      value = tags$p(paste(round(science_primary_school * 100,0), '%'),
+                     style = "font-size: 300%;"),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+  
+  if (input$valuecard3 == 'Science at Secondary School')
+    v = value_box(
+      theme = "light",
+      title = "Learned About Science at Secondary School",
+      value = tags$p(paste(round(science_secondary_school * 100,0), '%'),
+                     style = "font-size: 300%;")
+      )
+ 
+  
+  if (input$valuecard3 == 'Science at College/University')
+    v = value_box(
+      theme = "light",
+      title = "Learned About Science at College/University",
+      value = tags$p(paste(round(science_college * 100,0), '%'),
+                     style = "font-size: 300%;"),
       showcase_layout = showcase_top_right(max_height = "100px"))
     
   v
@@ -406,8 +547,7 @@ output$myvaluebox3 <- renderUI({
 ```
 
 
-
-## Column - Medals by year {width="50%"}
+## Column - Medals by year {width="40%"}
 
 ### Row - Vaccines {.tabset height="75%"}
 
@@ -491,7 +631,7 @@ top30rate %>% select(!total) %>%
   cols_align(align = "left", columns = Country) %>% 
   data_color(
     method = "numeric",
-    palette = "viridis"
+    palette = "BuGn"
   ) %>% fmt_percent(c('Strongly Agree', 'Somewhat Agree', 'Neither',
                       'Somewhat Disagree', 'Strongly Disagree'))
 ```
@@ -530,17 +670,12 @@ bottom30rate %>% select(!total) %>%
   cols_align(align = "left", columns = Country) %>% 
   data_color(
     method = "numeric",
-    palette = "viridis"
+    palette = "BuGn"
   ) %>% fmt_percent(c('Strongly Agree', 'Somewhat Agree', 'Neither',
                       'Somewhat Disagree', 'Strongly Disagree'))
 
 ```
 :::
-
-
-
-
-
 
 
 # Trust in Scientists
@@ -556,8 +691,8 @@ bottom30rate %>% select(!total) %>%
 
 
 sliderInput('numBins', 'Number of Bins', 
-            min=2, max=10,
-            value=10, 
+            min=2, max=11,
+            value=11, 
             step=1, round=0)
 br()
 p()
@@ -565,14 +700,13 @@ p()
 ```
 
 
-## Column - Plots {width="55%"}
+## Column - Plots {width="60%"}
 
-::: {.card title="Percentage of Population Who Trust Scientists"}
+::: {.card title="Percentage of Population Who Have High Trust in Scientists"}
 
 
 ```{r}
 #| context: setup
-
 
 #https://rstudio.github.io/leaflet/articles/shiny.html
 leafletOutput('mymap')
@@ -585,7 +719,7 @@ leafletOutput('mymap')
 
 #creating bins for coloring
 colorpal <- reactive({
-  colorBin("Paired",domain = chloroplethdf$perc_trust,
+  colorBin("Spectral", reverse = FALSE, domain = chloroplethdf$perc_trust,
                bins = seq(0,100,length.out = input$numBins))
 })
 
@@ -593,8 +727,18 @@ colorpal <- reactive({
 #only include aspects of the map that wont need to be changed dynamically
 output$mymap <- renderLeaflet({ 
   
+  pal <- colorpal()
+  
   leaflet(chloroplethdf) %>% addTiles()  %>%
-    setView(lng = 0, lat = 0, zoom = 2)
+    setView(lng = 0, lat = 0, zoom = 2) %>%
+    addPolygons(weight = .2, opacity = 1,
+                fillColor = ~pal(perc_trust), 
+                popup = ~paste(country_name, ":",perc_trust, '%'), 
+                label = ~paste(country_name, ":",perc_trust, '%'), 
+                stroke = FALSE) %>%
+    addLegend(pal = pal, title = "",
+              values = ~perc_trust, position = "bottomleft",            
+              labFormat = labelFormat(suffix = "%"))
 })
 
 #aspects of map that will be changed dynamically
@@ -603,7 +747,8 @@ observe({
   
   pal <- colorpal()
 
-  leafletProxy("mymap", data = chloroplethdf)  %>%clearShapes() %>%
+  leafletProxy("mymap", data = chloroplethdf)  %>% 
+    clearShapes() %>%
     addPolygons(weight = .2, opacity = 1,
                 fillColor = ~pal(perc_trust), 
                 popup = ~paste(country_name, ":",perc_trust, '%'), 
@@ -617,20 +762,17 @@ observe({
 
     leafletProxy("mymap", data = chloroplethdf) %>% 
     clearControls() %>%
-    addLegend(pal = pal, 
-              values = ~perc_trust, position = "bottomleft", 
-              title = paste(class(pal), class(colorpal())), 
+    addLegend(pal = pal, title = "",
+              values = ~perc_trust, position = "bottomleft",            
               labFormat = labelFormat(suffix = "%"))
     
   })
-
 ```
 
 :::
 
 
-
-## Column - Medals by year {width="45%"}
+## Column - Medals by year {width="40%"}
 
 ### Row - Valueboxes {height="30%"}
 
@@ -652,14 +794,15 @@ non_religious_trust_science = wgm2018_full_new2 %>% filter(D1 == '2') %>%
 
 ```
 
-::: {.valuebox icon="yin-yang" color="#FF0000"}
-`{r} paste(round(religious_trust_science*100,1), "%")`
+::: {.valuebox icon="yin-yang" color="#c3f9de"}
+`{r} paste(round(religious_trust_science*100,1),"%")`
 
 of Religious People Have High Trust in Science
+
 :::
 
-::: {.valuebox icon="slash-circle" color="#000000"}
-`{r} paste(round(non_religious_trust_science*100,1), "%")`
+::: {.valuebox icon="slash-circle" color="#f2cad2"}
+`{r} paste(round(non_religious_trust_science*100,1),"%")`
 
 of Non-Religious People Have High Trust in Science
 :::
@@ -671,7 +814,7 @@ of Non-Religious People Have High Trust in Science
 
 ```{r}
 #| label: barplot
-#barplot in distribution of belief about science by educatiomn level
+#barplot in distribution of belief about science by education level
 
 wgm2018_full_new2 %>% filter(Q12 %in% c(1,2,3,4)) %>% 
   filter(Education %in% c(1,2,3)) %>%
@@ -685,7 +828,7 @@ wgm2018_full_new2 %>% filter(Q12 %in% c(1,2,3,4)) %>%
   theme(legend.position = "right", panel.grid = element_blank(),
         axis.ticks.x = element_blank(), axis.ticks.y = element_blank(),
         plot.title.position = "plot", panel.grid.major = element_blank()) +
-  scale_fill_manual(values = c('red', 'orange', 'yellow', 'green')) +
+  scale_fill_manual(values = c('#f2cad2', '#f5d8e3', '#d3fdef', '#c3f9de')) +
   theme_minimal() +
   theme(panel.grid.minor = element_blank(), panel.grid.major.x =element_blank(),
         panel.grid.major.y =element_blank(), axis.ticks.x = element_blank())
