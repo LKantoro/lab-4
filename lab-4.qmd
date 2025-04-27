@@ -17,13 +17,6 @@ logo-alt: Wellcome Organization Logo
 ---
 
 ```{r}
-
-#use dropdown menu for selection of yes/no science questions
-```
-
-
-
-```{r}
 #| context: setup
 #| label: load-packages
 #| message: false
@@ -184,7 +177,375 @@ chloroplethdf = st_sf(chloroplethdf)
 
 
 
-# {.sidebar}
+
+
+
+
+
+# Science vs. Vaccines
+
+## {.sidebar width="200px"}
+
+```{r}
+#| context: setup
+
+selectInput('valuecard', label = 'Valuecards', 
+            choice = c('Percentage', 'Proportion'),
+            multiple = FALSE, selected = 'Percentage')
+```
+
+
+## Column - Plots {width="50%"}
+
+### Row {height="75%"}
+
+
+
+```{r}
+#| label: plotly_prep_1
+
+#finding the count of surveyed people
+country_counts = wgm2018_full_new2 %>% 
+  group_by(country_name) %>% 
+  summarise(total_count = n()) %>%
+  rename('total_surveyed' = total_count)
+
+#finding the count of people who think vaccines are effective
+vaccine_effective_counts = wgm2018_full_new2 %>%
+  filter(Q26 %in% c('1'), map_region != 'Not Assigned') %>%
+  group_by(country_name, map_region) %>% 
+  summarise(total_effective = n())
+  
+
+#finding the count of people who are knowledgeable about science
+know_science_counts = wgm2018_full_new2 %>% 
+  filter(Q1 %in% c('1', '2'), map_region != 'Not Assigned') %>%
+  group_by(country_name, map_region) %>% 
+  summarise(total_science = n()) 
+
+```
+
+```{r}
+#| label: plotly_prep_2
+
+
+#finding percent of people who think vaccines are effective
+percent_effective = inner_join(country_counts, vaccine_effective_counts, 
+                               by = join_by(country_name == country_name))
+
+percent_effective$percent_eff = 
+  percent_effective$total_effective/percent_effective$total_surveyed
+
+#finding percent of people who are knowledgeable about science
+percent_science = inner_join(country_counts, know_science_counts, 
+                             by = join_by(country_name == country_name))
+
+#finding proportion of people who are knowledgeable about science
+percent_science$prop_sci = 
+  percent_science$total_science/percent_science$total_surveyed
+
+
+#joining effective counts with safe counts
+percent_effective_and_science = left_join(percent_effective, percent_science, 
+                                       by = join_by(country_name==country_name))
+
+
+#rounding to 2 decimal places for cleanliness
+percent_effective_and_science = percent_effective_and_science %>% 
+  mutate(percent_eff = round(percent_eff, 2), prop_sci = round(prop_sci, 2))
+
+
+
+```
+
+::: {.card title="Belief Vaccines are Effective vs. Understanding of Science"}
+
+```{r}
+#| label: plotly_graph
+
+#scatterplot of vaccination rates vs science
+
+plot_ly(data = percent_effective_and_science, 
+        x = ~prop_sci, y = ~percent_eff, 
+        type = "scatter", mode = "markers", text = ~country_name, 
+        color = ~map_region.x) %>%
+  layout(plot_bgcolor='white',
+    xaxis = list(range = list(0, 1), tickformat = ".0%", 
+                 title = "'Strong' or 'Some' Knowledge of Science"),
+    yaxis = list(range = list(0, 1), tickformat = ".0%",
+                 title = ""), 
+    legend = list(x = 0.85, y = 0.04, bordercolor = 'black',
+                       borderwidth = 2, font = list(size = 10))) %>%
+  add_trace(showlegend = FALSE, hovertemplate = 'Knowledge of Science: %{x} 
+Vaccine Effectiveness: %{y}
+%{text}')
+```
+
+:::
+
+
+### Row {height="25%"}
+
+
+```{r}
+#| context: setup
+
+uiOutput('myvaluebox1')
+
+```
+
+
+```{r}
+#| context: setup
+
+uiOutput('myvaluebox2')
+
+```
+
+```{r}
+#| context: setup
+
+uiOutput('myvaluebox3')
+```
+
+
+```{r}
+#| context: setup
+#| label: valueboxes_prep
+
+want_to_know_more_science = wgm2018_full_new2 %>% 
+  count(Q8) %>% mutate(prop = prop.table(n)) %>% 
+  filter(Q8 == '1') %>% 
+  select(prop)
+
+
+want_to_know_more_disease = wgm2018_full_new2 %>% 
+  count(Q9) %>% mutate(prop = prop.table(n)) %>% 
+  filter(Q9 == '1') %>% 
+  select(prop)
+
+disease_part_of_science = wgm2018_full_new2 %>% 
+  count(Q3) %>% mutate(prop = prop.table(n)) %>% 
+  filter(Q3 == '1') %>% 
+  select(prop)
+
+```
+
+
+
+
+```{r}
+#| context: server
+
+
+output$myvaluebox1 <- renderUI({
+  
+  if (input$valuecard == "Percentage")
+    v = value_box(theme_color = "success",
+      title = "Want To Learn More About Science",
+      value = paste(round(want_to_know_more_science * 100,2), '%'),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+ 
+  
+  if (input$valuecard == "Proportion")
+    v = value_box(theme_color = "success",
+      title = "Want To Learn More About Science",
+      value = round(want_to_know_more_science,4),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+    
+  v
+  
+})
+```
+
+```{r}
+#| context: server
+
+output$myvaluebox2 <- renderUI({
+  
+  if (input$valuecard == "Percentage")
+    v = value_box(theme_color = "success",
+      title = "Want To Learn More About Science",
+      value = paste(round(want_to_know_more_science * 100,2), '%'),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+ 
+  
+  if (input$valuecard == "Proportion")
+    v = value_box(theme_color = "success",
+      title = "Want To Learn More About Science",
+      value = round(want_to_know_more_science,4),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+    
+  v
+  
+})
+```
+
+```{r}
+#| context: server
+
+output$myvaluebox3 <- renderUI({
+  
+  if (input$valuecard == "Percentage")
+    v = value_box(theme_color = "success",
+      title = "Want To Learn More About Science",
+      value = paste(round(want_to_know_more_science * 100,2), '%'),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+ 
+  
+  if (input$valuecard == "Proportion")
+    v = value_box(theme_color = "success",
+      title = "Want To Learn More About Science",
+      value = round(want_to_know_more_science,4),
+      showcase_layout = showcase_top_right(max_height = "100px"))
+    
+  v
+  
+})
+
+```
+
+
+
+## Column - Medals by year {width="50%"}
+
+### Row - Vaccines {.tabset height="75%"}
+
+::: {.card title="Belief in Vaccine Effectiveness"}
+
+```{r}
+#| label: dotplot_1
+
+percent_effective %>% ggplot(aes(x = percent_eff, fill = map_region, 
+                              color = map_region)) +
+  geom_dotplot(binwidth = .01) + 
+  facet_grid(rows = vars(map_region), axis.labels = "margins") +
+  labs(x = "", y = "", fill = "",
+       title = 
+         "People Who 'Agreed' or 'Strongly Agreed' Vaccines Are Effective") +
+  geom_text(aes(x = .5, y = .8, label = map_region)) +
+  theme_light() + 
+  theme(strip.text = element_blank(), legend.position = "none", 
+        panel.grid.minor = element_blank(), panel.grid.major =element_blank(),
+        plot.title.position = "plot", axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank()) +
+  scale_x_continuous(labels = scales::percent, limits = c(0,1))
+```
+
+:::
+
+::: {.card title="Knowledge of Science"}
+
+```{r}
+#| label: dotplot_2
+
+percent_science %>% ggplot(aes(x = prop_sci, fill = map_region, 
+                              color = map_region)) +
+  geom_dotplot(binwidth = .01) + 
+  facet_grid(rows = vars(map_region), axis.labels = "margins") +
+  labs(x = "", y = "", fill = "",
+       title = "People Who Claim 'A lot' or 'Some' Understanding of Science") +
+  geom_text(aes(x = .5, y = .8, label = map_region)) +
+  theme_light() + 
+  theme(strip.text = element_blank(), legend.position = "none", 
+        panel.grid.minor = element_blank(), panel.grid.major = element_blank(),
+        plot.title.position = "plot", axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank()) +
+  scale_x_continuous(labels = scales::percent, limits = c(0,1))
+```
+
+:::
+
+
+### Row - Tables {.tabset height="25%"}
+
+::: {.card title="Vaccine Safety Beliefs Top 30"}
+
+```{r}
+#| label: table_1
+
+#table of safe vaccination rates (in percents)
+
+top30rate = wgm2018_full_new2 %>% 
+  group_by(country_name, Q25) %>% 
+  summarize(total_count = n()) %>%
+  pivot_wider(names_from = 'Q25', values_from = 'total_count') %>%
+  select(country_name, '1', '2', '3', '4', '5') %>%
+  mutate(total = sum(c_across(1:5))) %>% 
+  mutate(across(1:5, ~ . / total)) %>%
+  rename("Strongly_Agree" = '1', "Somewhat_Agree" = '2', 
+         "Neither" = '3', "Somewhat_Disagree" = '4',
+         "Strongly_Disagree" = '5') %>% 
+  arrange(desc(Strongly_Agree)) 
+
+
+top30rate %>% select(!total) %>%
+  rename("Country" = "country_name",
+         "Strongly Agree" = "Strongly_Agree", 
+         "Somewhat Agree" = 'Somewhat_Agree',
+         "Somewhat Disagree" = 'Somewhat_Disagree',
+         "Strongly Disagree" = 'Strongly_Disagree') %>% 
+  ungroup() %>%
+  slice_head(n = 30) %>%
+  gt() %>% 
+  cols_align(align = "left", columns = Country) %>% 
+  data_color(
+    method = "numeric",
+    palette = "viridis"
+  ) %>% fmt_percent(c('Strongly Agree', 'Somewhat Agree', 'Neither',
+                      'Somewhat Disagree', 'Strongly Disagree'))
+```
+:::
+
+::: {.card title="Vaccine Safety Beliefs Bottom 30"}
+
+```{r}
+#| label: table_2
+
+#table of safe vaccination rates (in percents)
+
+  
+bottom30rate = wgm2018_full_new2 %>% 
+  group_by(country_name, Q25) %>% 
+  summarize(total_count = n()) %>%
+  pivot_wider(names_from = 'Q25', values_from = 'total_count') %>%
+  select(country_name, '1', '2', '3', '4', '5') %>%
+  mutate(total = sum(c_across(1:5))) %>% 
+  mutate(across(1:5, ~ . / total)) %>%
+  rename("Strongly_Agree" = '1', "Somewhat_Agree" = '2', 
+         "Neither" = '3', "Somewhat_Disagree" = '4',
+         "Strongly_Disagree" = '5') %>% 
+  arrange(desc(Strongly_Disagree))
+
+
+bottom30rate %>% select(!total) %>%
+  rename("Country" = "country_name",
+         "Strongly Agree" = "Strongly_Agree", 
+         "Somewhat Agree" = 'Somewhat_Agree',
+         "Somewhat Disagree" = 'Somewhat_Disagree',
+         "Strongly Disagree" = 'Strongly_Disagree') %>% 
+  ungroup() %>% 
+  slice_head(n = 30) %>%
+  gt() %>% 
+  cols_align(align = "left", columns = Country) %>% 
+  data_color(
+    method = "numeric",
+    palette = "viridis"
+  ) %>% fmt_percent(c('Strongly Agree', 'Somewhat Agree', 'Neither',
+                      'Somewhat Disagree', 'Strongly Disagree'))
+
+```
+:::
+
+
+
+
+
+
+
+# Trust in Scientists
+
+## {.sidebar width="200px"}
 
 ```{r}
 #| context: setup
@@ -200,31 +561,13 @@ sliderInput('numBins', 'Number of Bins',
             step=1, round=0)
 br()
 p()
-#checkboxInput('jitter', 'Jitter')
-#checkboxInput('smooth', 'Smooth')
-
-
-
-
-selectInput('valuecard1', label = 'Valuecard 1', 
-            choice = c('Percentage', 'Proportion'),
-            multiple = FALSE, selected = 'Percentage') 
-
 
 ```
 
 
-# Science vs. Vaccines
-
-## Column - Plots {width="50%"}
-
-### Row {height="75%"}
-
-
-
+## Column - Plots {width="55%"}
 
 ::: {.card title="Percentage of Population Who Trust Scientists"}
-
 
 
 ```{r}
@@ -235,39 +578,12 @@ selectInput('valuecard1', label = 'Valuecard 1',
 leafletOutput('mymap')
 ```
 
-
-```{r}
-#| context: setup
-
-uiOutput('myvaluebox')
-```
-
-
 ```{r}
 #| context: server
 #| label: chloropleth1
 
 
 #creating bins for coloring
-binsdynamic = reactive({
-  seq(0,100,length.out = input$numBins)
-})
-
-apple = reactive({input$numBins})
-
-
-#binsstatic = 
-
-
-#print(binsstatic)
-  
-#dataInput <- reactive({
-#  getSymbols(input$symb, src = "yahoo",
-##    from = input$dates[1],
-#    to = input$dates[2],
-#    auto.assign = FALSE)
-#})
-
 colorpal <- reactive({
   colorBin("Paired",domain = chloroplethdf$perc_trust,
                bins = seq(0,100,length.out = input$numBins))
@@ -312,52 +628,68 @@ observe({
 
 :::
 
-### Row {height="25%"}
 
 
+## Column - Medals by year {width="45%"}
 
-
+### Row - Valueboxes {height="30%"}
 
 ```{r}
-#| context: setup
-#| label: valueboxes_prep
+#| label: valuebox_prep
+
+#Q11C, trust in scientists
+
+#percent of religious people who trust scientists
+religious_trust_science = wgm2018_full_new2 %>% filter(D1 == '1') %>%
+  count(Q12) %>% mutate(prop = prop.table(n)) %>%
+  filter(Q12 == '1') %>% select(prop)
 
 
-want_to_know_more_science = wgm2018_full_new2 %>% 
-  count(Q8) %>% mutate(prop = prop.table(n)) %>% 
-  filter(Q8 == '1') %>% 
-  select(prop)
-
+#percent of non-religious people who trust scientists
+non_religious_trust_science = wgm2018_full_new2 %>% filter(D1 == '2') %>%
+  count(Q12) %>% mutate(prop = prop.table(n)) %>%
+  filter(Q12 == '1') %>% select(prop)
 
 ```
 
+::: {.valuebox icon="yin-yang" color="#FF0000"}
+`{r} paste(round(religious_trust_science*100,1), "%")`
 
+of Religious People Have High Trust in Science
+:::
+
+::: {.valuebox icon="slash-circle" color="#000000"}
+`{r} paste(round(non_religious_trust_science*100,1), "%")`
+
+of Non-Religious People Have High Trust in Science
+:::
+
+### Row - Medals By Year {height="70%"}
+
+::: {.card title="Science Belief By Education Level"}
 
 
 ```{r}
-#| context: server
+#| label: barplot
+#barplot in distribution of belief about science by educatiomn level
 
-
-
-
-output$myvaluebox <- renderUI({
-  
-  if (input$valuecard1 == "Percentage")
-    v = value_box(theme_color = "success",
-      title = "Want To Learn More About Science",
-      value = paste(round(want_to_know_more_science * 100,2), '%'),
-      showcase_layout = showcase_top_right(max_height = "100px"))
-    
- 
-  
-  if (input$valuecard1 == "Proportion")
-    v = value_box(theme_color = "success",
-      title = "Want To Learn More About Science",
-      value = round(want_to_know_more_science,4),
-      showcase_layout = showcase_top_right(max_height = "100px"))
-  
-  
-  v
-})
+wgm2018_full_new2 %>% filter(Q12 %in% c(1,2,3,4)) %>% 
+  filter(Education %in% c(1,2,3)) %>%
+  ggplot(aes(x = factor(Education, levels = c('1', '2', '3'), 
+                        labels = c('Primary','Secondary', 'Tertiary')),
+             fill = factor(Q12, levels = c('4', '3', '2', '1'), 
+                           labels = c('None', 'Little', 'Some', 'Strong')))) + 
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = 'Education Level', y = '', fill = 'Belief Level') +
+  theme(legend.position = "right", panel.grid = element_blank(),
+        axis.ticks.x = element_blank(), axis.ticks.y = element_blank(),
+        plot.title.position = "plot", panel.grid.major = element_blank()) +
+  scale_fill_manual(values = c('red', 'orange', 'yellow', 'green')) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank(), panel.grid.major.x =element_blank(),
+        panel.grid.major.y =element_blank(), axis.ticks.x = element_blank())
 
 ```
+
+:::
