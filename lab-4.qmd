@@ -21,6 +21,14 @@ logo-alt: Wellcome Organization Logo
 #| label: load-packages
 #| message: false
 
+```
+
+
+
+
+```{r}
+#| context: setup
+
 library(tidyverse)
 library(gt)
 library(dplyr)
@@ -37,140 +45,48 @@ library(shiny)
 
 ```{r}
 #| context: setup
-#| label: read-in-wellcome-data
-
-wgm2018_crosstab = read_excel(here::here("data", "wgm2018-dataset-crosstabs-all-countries.xlsx"), sheet = 1)
-
-wgm2018_full = read_excel(here::here("data", "wgm2018-dataset-crosstabs-all-countries.xlsx"), sheet = 2)
-
-wgm2018_dict = read_excel(here::here("data", "wgm2018-dataset-crosstabs-all-countries.xlsx"), sheet = 3)
-```
-
-```{r}
-#| context: setup
-#| label: country_label_prep
-
-#creating string based on list provided
-countriesstringsplit = str_split(wgm2018_dict[1,3], ',')
-
-#changing the vector into a df and eliminating the last row, which was blank
-countriesdf = as.data.frame(countriesstringsplit, col.names = c("country")) %>%
-  filter(!row_number() %in% c(145))
-
-#creating a two column data frame about the '=' and changing the code to numeric
-countriesdf = countriesdf %>% 
-  separate_wider_delim(country, delim = "=", 
-                       names = c("country_code", "country_name")) %>% 
-  mutate(country_code = as.numeric(country_code))
-```
-
-```{r}
-#| context: setup
-#| label: region_label_prep
-
-#similar process for splitting regions, as was done above for countries
-
-regionsstringsplit = str_split(wgm2018_dict[57,3], ',')
-
-regionsdf = as.data.frame(regionsstringsplit, col.names = c("region")) %>%
-  filter(!row_number() %in% c(20))
-
-regionsdf = regionsdf %>% 
-  separate_wider_delim(region, delim = "=", 
-                       names =c("region_code", "region_name")) %>% 
-  mutate(region_code = as.numeric(region_code))
+#| label: read_in_data
 
 
-#creating a new column for world region to be used to split the graph
+bottom30rate = read_csv(here::here("data", "bottom30rate.csv"))
 
-regionsdf = regionsdf %>% mutate('map_region' = case_when(
-          region_code %in% c(9,10,11,12, 18) ~ 'Asia and Australia',
-          region_code %in% c(1,2,4,5) ~ 'Sub-Saharan Africa',
-          region_code %in% c(6,7,8) ~ 'Americas',
-          region_code %in% c(15,16,17) ~ 'Europe',
-          region_code %in% c(3,13) ~ 'Middle East and North Africa',
-          region_code == 14 ~ 'Former Soviet Union',
-          region_code == 0 ~ 'Not Assigned'))
-```
 
-```{r}
-#| context: setup
-#| label: full_data_with_countries_and_regions
+disease_part_of_science = read_csv(here::here("data", "disease_part_of_science.csv"))
 
-#merging to create full dataset to use in visuals
-wgm2018_full_new1 = left_join(wgm2018_full, countriesdf, 
-                              by = join_by(WP5 == country_code))
 
-wgm2018_full_new2 = left_join(wgm2018_full_new1, regionsdf, 
-                              by = join_by(Regions_Report == region_code))
+non_religious_trust_science = read_csv(here::here("data", "non_religious_trust_science.csv"))
 
-countries_and_regions = wgm2018_full_new2 %>% 
-  select(country_name, region_name, map_region) %>% distinct()
 
+percent_effective = read_csv(here::here("data", "percent_effective.csv"))
+
+
+percent_effective_and_science = read_csv(here::here("data", "percent_effective_and_science.csv"))
+
+percent_science = read_csv(here::here("data", "percent_science.csv"))
+
+percent_trust = read_csv(here::here("data", "percent_trust.csv"))
+
+
+religious_trust_science = read_csv(here::here("data", "religious_trust_science.csv"))
+  
+science_college = read_csv(here::here("data", "science_college.csv"))
+
+science_primary_school = read_csv(here::here("data", "science_primary_school.csv"))
+
+
+science_secondary_school = read_csv(here::here("data", "science_secondary_school.csv"))
+
+top30rate = read_csv(here::here("data", "top30rate.csv"))
+
+want_to_know_more_disease = read_csv(here::here("data", "want_to_know_more_disease.csv")) 
+
+want_to_know_more_science = read_csv(here::here("data", "want_to_know_more_science.csv")) 
+  
+wgm2018_full_new2 = read_csv(here::here("data", "wgm2018_full_new2.csv")) 
 ```
 
 
 
-```{r}
-#| context: setup
-#| label: chloropleth_prep_1
-
-#finding country geometries: https://r-graph-gallery.com/183-choropleth-map-with-leaflet.html
-
-#download.file(
-##  "https://raw.githubusercontent.com/holtzy/R-graph-gallery/master/DATA/world_shape_file.zip",
-#  destfile = "data/world_shape_file.zip"
-#)
-
-#system("unzip DATA/world_shape_file.zip")
-
-world_sf <- read_sf(paste0(
-  getwd(), "/data/world_shape_file/",
-  "TM_WORLD_BORDERS_SIMPL-0.3.shp"
-))
-```
-
-```{r}
-#| context: setup
-#| label: chloropleth_prep_2
-
-
-country_counts = wgm2018_full_new2 %>% 
-  group_by(country_name) %>% 
-  summarise(total_count = n()) %>%
-  rename('total_surveyed' = total_count)
-
-#finding the count of people who are knowledgeable about science
-trust_scientists_counts = wgm2018_full_new2 %>% 
-  filter(Q11C %in% c('1', '2')) %>%
-  group_by(country_name, map_region) %>% 
-  summarise(total_trust = n()) 
-
-
-#finding percent of people who are knowledgeable about science
-percent_trust = inner_join(country_counts, trust_scientists_counts, 
-                             by = join_by(country_name == country_name))
-
-
-percent_trust$perc_trust = 
-  round(percent_trust$total_trust/percent_trust$total_surveyed * 100,2)
-
-
-#joining country geometries and overall data frame together
-chloroplethdf = right_join(percent_trust, world_sf, 
-                           by = join_by(country_name == NAME))
-
-```
-
-
-```{r}
-#| context: setup
-#| label: chloropleth_prep_3
-
-
-#converting data.frame to sf for graphing using leaflet: https://r-spatial.github.io/sf/reference/sf.html
-chloroplethdf = st_sf(chloroplethdf)
-```
 
 
 
@@ -214,62 +130,9 @@ selectInput('valuecard3', label = 'Valuecard 3',
 
 ### Row {height="75%"}
 
-```{r}
-#| label: plotly_prep_1
-
-#finding the count of surveyed people
-country_counts = wgm2018_full_new2 %>% 
-  group_by(country_name) %>% 
-  summarise(total_count = n()) %>%
-  rename('total_surveyed' = total_count)
-
-#finding the count of people who think vaccines are effective
-vaccine_effective_counts = wgm2018_full_new2 %>%
-  filter(Q26 %in% c('1'), map_region != 'Not Assigned') %>%
-  group_by(country_name, map_region) %>% 
-  summarise(total_effective = n())
-  
-
-#finding the count of people who are knowledgeable about science
-know_science_counts = wgm2018_full_new2 %>% 
-  filter(Q1 %in% c('1', '2'), map_region != 'Not Assigned') %>%
-  group_by(country_name, map_region) %>% 
-  summarise(total_science = n()) 
-
-```
-
-```{r}
-#| label: plotly_prep_2
-
-
-#finding percent of people who think vaccines are effective
-percent_effective = inner_join(country_counts, vaccine_effective_counts, 
-                               by = join_by(country_name == country_name))
-
-percent_effective$percent_eff = 
-  percent_effective$total_effective/percent_effective$total_surveyed
-
-#finding percent of people who are knowledgeable about science
-percent_science = inner_join(country_counts, know_science_counts, 
-                             by = join_by(country_name == country_name))
-
-#finding proportion of people who are knowledgeable about science
-percent_science$prop_sci = 
-  percent_science$total_science/percent_science$total_surveyed
-
-
-#joining effective counts with safe counts
-percent_effective_and_science = left_join(percent_effective, percent_science, 
-                                       by = join_by(country_name==country_name))
-
-
-#rounding to 2 decimal places for cleanliness
-percent_effective_and_science = percent_effective_and_science %>% 
-  mutate(percent_eff = round(percent_eff, 2), prop_sci = round(prop_sci, 2))
 
 
 
-```
 
 ::: {.card title="Belief Vaccines are Effective vs. Understanding of Science"}
 
@@ -320,44 +183,6 @@ uiOutput('myvaluebox3')
 ```
 
 
-```{r}
-#| context: setup
-#| label: valueboxes_prep
-
-want_to_know_more_science = wgm2018_full_new2 %>% 
-  count(Q8) %>% mutate(prop = prop.table(n)) %>% 
-  filter(Q8 == '1') %>% 
-  select(prop)
-
-
-want_to_know_more_disease = wgm2018_full_new2 %>% 
-  count(Q9) %>% mutate(prop = prop.table(n)) %>% 
-  filter(Q9 == '1') %>% 
-  select(prop)
-
-disease_part_of_science = wgm2018_full_new2 %>% 
-  count(Q3) %>% mutate(prop = prop.table(n)) %>% 
-  filter(Q3 == '1') %>% 
-  select(prop)
-
-
-science_primary_school = wgm2018_full_new2 %>% 
-  count(Q5A) %>% mutate(prop = prop.table(n)) %>% 
-  filter(Q5A == '1') %>% 
-  select(prop)
-
-science_secondary_school = wgm2018_full_new2 %>% 
-  count(Q5B) %>% mutate(prop = prop.table(n)) %>% 
-  filter(Q5B == '1') %>% 
-  select(prop)
-
-science_college = wgm2018_full_new2 %>% 
-  count(Q5C) %>% mutate(prop = prop.table(n)) %>% 
-  filter(Q5C == '1') %>% 
-  select(prop)
-
-
-```
 
 
 ```{r}
@@ -366,17 +191,13 @@ science_college = wgm2018_full_new2 %>%
 #changing font size of valuebox text: 
 #https://www.edureka.co/community/32147/change-font-size-of-valuebox-shiny-r
 
-
-
-
-
 output$myvaluebox1 <- renderUI({
   
   if (input$valuecard1 == 'More About Science')
     v = value_box(
       theme = "info",
       title = "Want To Learn More About Science",
-      value = tags$p(paste(round(want_to_know_more_science * 100,0), '%'),
+      value = tags$p(paste(round(want_to_know_more_science$prop * 100,0), '%'),
                      style = "font-size: 300%;")
       )
  
@@ -385,15 +206,16 @@ output$myvaluebox1 <- renderUI({
     v = value_box(
       theme = "info",
       title = "Want To Learn More About Disease",
-      value = tags$p(paste(round(want_to_know_more_disease * 100,0), '%'),
+      value = tags$p(paste(round(want_to_know_more_disease$prop * 100,0), '%'),
                      style = "font-size: 300%;"),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      showcase_layout = showcase_top_right(max_height = "100px")
+      )
   
   if (input$valuecard1 == 'Diseases a Part of Science')
     v = value_box(
       theme = "info",
       title = "Believe Diseases are a Part of Science",
-      value = tags$p(paste(round(disease_part_of_science * 100,0), '%'),
+      value = tags$p(paste(round(disease_part_of_science$prop * 100,0), '%'),
                      style = "font-size: 300%;")
       )
  
@@ -402,15 +224,16 @@ output$myvaluebox1 <- renderUI({
     v = value_box(
       theme = "info",
       title = "Learned About Science at Primary School",
-      value = tags$p(paste(round(science_primary_school * 100,0), '%'),
+      value = tags$p(paste(round(science_primary_school$prop * 100,0), '%'),
                      style = "font-size: 300%;"),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      showcase_layout = showcase_top_right(max_height = "100px")
+      )
   
   if (input$valuecard1 == 'Science at Secondary School')
     v = value_box(
       theme = "info",
       title = "Learned About Science at Secondary School",
-      value = tags$p(paste(round(science_secondary_school * 100,0), '%'),
+      value = tags$p(paste(round(science_secondary_school$prop * 100,0), '%'),
                      style = "font-size: 300%;")
       )
  
@@ -419,9 +242,10 @@ output$myvaluebox1 <- renderUI({
     v = value_box(
       theme = "info",
       title = "Learned About Science at College/University",
-      value = tags$p(paste(round(science_college * 100,0), '%'),
+      value = tags$p(paste(round(science_college$prop * 100,0), '%'),
                      style = "font-size: 300%;"),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      showcase_layout = showcase_top_right(max_height = "100px")
+      )
     
   v
   
@@ -435,7 +259,7 @@ output$myvaluebox2 <- renderUI({
     v = value_box(
       theme = "success",
       title = "Want To Learn More About Science",
-      value = tags$p(paste(round(want_to_know_more_science * 100,0), '%'),
+      value = tags$p(paste(round(want_to_know_more_science$prop * 100,0), '%'),
                      style = "font-size: 300%;")
       )
  
@@ -444,15 +268,16 @@ output$myvaluebox2 <- renderUI({
     v = value_box(
       theme = "success",
       title = "Want To Learn More About Disease",
-      value = tags$p(paste(round(want_to_know_more_disease * 100,0), '%'),
+      value = tags$p(paste(round(want_to_know_more_disease$prop * 100,0), '%'),
                      style = "font-size: 300%;"),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      showcase_layout = showcase_top_right(max_height = "100px")
+      )
   
   if (input$valuecard2 == 'Diseases a Part of Science')
     v = value_box(
       theme = "success",
       title = "Believe Diseases are a Part of Science",
-      value = tags$p(paste(round(disease_part_of_science * 100,0), '%'),
+      value = tags$p(paste(round(disease_part_of_science$prop * 100,0), '%'),
                      style = "font-size: 300%;")
       )
  
@@ -461,15 +286,16 @@ output$myvaluebox2 <- renderUI({
     v = value_box(
       theme = "success",
       title = "Learned About Science at Primary School",
-      value = tags$p(paste(round(science_primary_school * 100,0), '%'),
+      value = tags$p(paste(round(science_primary_school$prop * 100,0), '%'),
                      style = "font-size: 300%;"),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      showcase_layout = showcase_top_right(max_height = "100px")
+      )
   
   if (input$valuecard2 == 'Science at Secondary School')
     v = value_box(
       theme = "success",
       title = "Learned About Science at Secondary School",
-      value = tags$p(paste(round(science_secondary_school * 100,0), '%'),
+      value = tags$p(paste(round(science_secondary_school$prop * 100,0), '%'),
                      style = "font-size: 300%;")
       )
  
@@ -478,9 +304,10 @@ output$myvaluebox2 <- renderUI({
     v = value_box(
       theme = "success",
       title = "Learned About Science at College/University",
-      value = tags$p(paste(round(science_college * 100,0), '%'),
+      value = tags$p(paste(round(science_college$prop * 100,0), '%'),
                      style = "font-size: 300%;"),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      showcase_layout = showcase_top_right(max_height = "100px")
+      )
     
   v
   
@@ -493,7 +320,7 @@ output$myvaluebox3 <- renderUI({
     v = value_box(
       theme = "light",
       title = "Want To Learn More About Science",
-      value = tags$p(paste(round(want_to_know_more_science * 100,0), '%'),
+      value = tags$p(paste(round(want_to_know_more_science$prop * 100,0), '%'),
                      style = "font-size: 300%;")
       )
  
@@ -502,15 +329,16 @@ output$myvaluebox3 <- renderUI({
     v = value_box(
       theme = "light",
       title = "Want To Learn More About Disease",
-      value = tags$p(paste(round(want_to_know_more_disease * 100,0), '%'),
+      value = tags$p(paste(round(want_to_know_more_disease$prop * 100,0), '%'),
                      style = "font-size: 300%;"),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      showcase_layout = showcase_top_right(max_height = "100px")
+      )
   
   if (input$valuecard3 == 'Diseases a Part of Science')
     v = value_box(
       theme = "light",
       title = "Believe Diseases are a Part of Science",
-      value = tags$p(paste(round(disease_part_of_science * 100,0), '%'),
+      value = tags$p(paste(round(disease_part_of_science$prop * 100,0), '%'),
                      style = "font-size: 300%;")
       )
  
@@ -519,15 +347,16 @@ output$myvaluebox3 <- renderUI({
     v = value_box(
       theme = "light",
       title = "Learned About Science at Primary School",
-      value = tags$p(paste(round(science_primary_school * 100,0), '%'),
+      value = tags$p(paste(round(science_primary_school$prop * 100,0), '%'),
                      style = "font-size: 300%;"),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      showcase_layout = showcase_top_right(max_height = "100px")
+      )
   
   if (input$valuecard3 == 'Science at Secondary School')
     v = value_box(
       theme = "light",
       title = "Learned About Science at Secondary School",
-      value = tags$p(paste(round(science_secondary_school * 100,0), '%'),
+      value = tags$p(paste(round(science_secondary_school$prop * 100,0), '%'),
                      style = "font-size: 300%;")
       )
  
@@ -536,9 +365,10 @@ output$myvaluebox3 <- renderUI({
     v = value_box(
       theme = "light",
       title = "Learned About Science at College/University",
-      value = tags$p(paste(round(science_college * 100,0), '%'),
+      value = tags$p(paste(round(science_college$prop * 100,0), '%'),
                      style = "font-size: 300%;"),
-      showcase_layout = showcase_top_right(max_height = "100px"))
+      showcase_layout = showcase_top_right(max_height = "100px")
+      )
     
   v
   
@@ -599,24 +429,12 @@ percent_science %>% ggplot(aes(x = prop_sci, fill = map_region,
 
 ### Row - Tables {.tabset height="25%"}
 
-::: {.card title="Vaccine Safety Beliefs Top 30"}
+::: {.card title="Vaccines are Safe Top 30"}
 
 ```{r}
 #| label: table_1
 
 #table of safe vaccination rates (in percents)
-
-top30rate = wgm2018_full_new2 %>% 
-  group_by(country_name, Q25) %>% 
-  summarize(total_count = n()) %>%
-  pivot_wider(names_from = 'Q25', values_from = 'total_count') %>%
-  select(country_name, '1', '2', '3', '4', '5') %>%
-  mutate(total = sum(c_across(1:5))) %>% 
-  mutate(across(1:5, ~ . / total)) %>%
-  rename("Strongly_Agree" = '1', "Somewhat_Agree" = '2', 
-         "Neither" = '3', "Somewhat_Disagree" = '4',
-         "Strongly_Disagree" = '5') %>% 
-  arrange(desc(Strongly_Agree)) 
 
 
 top30rate %>% select(!total) %>%
@@ -637,25 +455,13 @@ top30rate %>% select(!total) %>%
 ```
 :::
 
-::: {.card title="Vaccine Safety Beliefs Bottom 30"}
+::: {.card title="Vaccines are Safe Bottom 30"}
 
 ```{r}
 #| label: table_2
 
 #table of safe vaccination rates (in percents)
 
-  
-bottom30rate = wgm2018_full_new2 %>% 
-  group_by(country_name, Q25) %>% 
-  summarize(total_count = n()) %>%
-  pivot_wider(names_from = 'Q25', values_from = 'total_count') %>%
-  select(country_name, '1', '2', '3', '4', '5') %>%
-  mutate(total = sum(c_across(1:5))) %>% 
-  mutate(across(1:5, ~ . / total)) %>%
-  rename("Strongly_Agree" = '1', "Somewhat_Agree" = '2', 
-         "Neither" = '3', "Somewhat_Disagree" = '4',
-         "Strongly_Disagree" = '5') %>% 
-  arrange(desc(Strongly_Disagree))
 
 
 bottom30rate %>% select(!total) %>%
@@ -688,8 +494,6 @@ bottom30rate %>% select(!total) %>%
 
 #Create global sidebars by adding the .sidebar class to level 1 headings. Sidebars can include code cells as well as images, narrative, and links.
 
-
-
 sliderInput('numBins', 'Number of Bins', 
             min=2, max=11,
             value=11, 
@@ -711,6 +515,33 @@ p()
 #https://rstudio.github.io/leaflet/articles/shiny.html
 leafletOutput('mymap')
 ```
+
+
+```{r}
+#| context: setup
+#| label: chloropleth_prep_1
+
+#finding country geometries: https://r-graph-gallery.com/183-choropleth-map-with-leaflet.html
+
+#download.file(
+##  "https://raw.githubusercontent.com/holtzy/R-graph-gallery/master/DATA/world_shape_file.zip",
+#  destfile = "data/world_shape_file.zip"
+#)
+
+#system("unzip DATA/world_shape_file.zip")
+
+world_sf <- read_sf(paste0(
+  getwd(), "/data/world_shape_file/",
+  "TM_WORLD_BORDERS_SIMPL-0.3.shp"
+))
+
+
+chloroplethdf = right_join(percent_trust, world_sf, 
+                           by = join_by(country_name == NAME))
+
+chloroplethdf = st_sf(chloroplethdf)
+```
+
 
 ```{r}
 #| context: server
@@ -776,33 +607,17 @@ observe({
 
 ### Row - Valueboxes {height="30%"}
 
-```{r}
-#| label: valuebox_prep
 
-#Q11C, trust in scientists
-
-#percent of religious people who trust scientists
-religious_trust_science = wgm2018_full_new2 %>% filter(D1 == '1') %>%
-  count(Q12) %>% mutate(prop = prop.table(n)) %>%
-  filter(Q12 == '1') %>% select(prop)
-
-
-#percent of non-religious people who trust scientists
-non_religious_trust_science = wgm2018_full_new2 %>% filter(D1 == '2') %>%
-  count(Q12) %>% mutate(prop = prop.table(n)) %>%
-  filter(Q12 == '1') %>% select(prop)
-
-```
 
 ::: {.valuebox icon="yin-yang" color="#c3f9de"}
-`{r} paste(round(religious_trust_science*100,1),"%")`
+`{r} paste(round(religious_trust_science$prop*100,1),"%")`
 
 of Religious People Have High Trust in Science
 
 :::
 
 ::: {.valuebox icon="slash-circle" color="#f2cad2"}
-`{r} paste(round(non_religious_trust_science*100,1),"%")`
+`{r} paste(round(non_religious_trust_science$prop*100,1),"%")`
 
 of Non-Religious People Have High Trust in Science
 :::

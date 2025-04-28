@@ -1,0 +1,143 @@
+"","country_name","total_surveyed","map_region","total_effective","percent_eff"
+"1","Afghanistan",1000,"Asia and Australia",774,0.774
+"2","Albania",1000,"Europe",437,0.437
+"3","Algeria",1000,"Middle East and North Africa",438,0.438
+"4","Argentina",1000,"Americas",703,0.703
+"5","Armenia",1000,"Asia and Australia",238,0.238
+"6","Australia",1003,"Asia and Australia",719,0.716849451645065
+"7","Austria",1000,"Europe",387,0.387
+"8","Azerbaijan",1000,"Asia and Australia",461,0.461
+"9","Bangladesh",1000,"Asia and Australia",915,0.915
+"10","Belarus",1061,"Former Soviet Union",309,0.291234684260132
+"11","Belgium",1004,"Europe",585,0.582669322709163
+"12","Benin",1000,"Sub-Saharan Africa",530,0.53
+"13","Bolivia",1000,"Americas",480,0.48
+"14","Bosnia and Herzegovina",1000,"Europe",577,0.577
+"15","Botswana",1002,"Sub-Saharan Africa",325,0.32435129740519
+"16","Brazil",1000,"Americas",556,0.556
+"17","Bulgaria",1001,"Former Soviet Union",320,0.31968031968032
+"18","Burkina Faso",1000,"Sub-Saharan Africa",521,0.521
+"19","Burundi",1000,"Sub-Saharan Africa",781,0.781
+"20","Cambodia",1000,"Asia and Australia",523,0.523
+"21","Cameroon",1000,"Sub-Saharan Africa",580,0.58
+"22","Canada",1012,"Americas",570,0.563241106719368
+"23","Chad",1000,"Sub-Saharan Africa",443,0.443
+"24","Chile",1000,"Americas",585,0.585
+"25","China",3649,"Asia and Australia",1643,0.450260345300082
+"26","Colombia",1000,"Americas",576,0.576
+"27","Comoros",1000,"Sub-Saharan Africa",726,0.726
+"28","Costa Rica",1000,"Americas",721,0.721
+"29","Croatia",1000,"Europe",436,0.436
+"30","Cyprus",1011,"Europe",331,0.327398615232443
+"31","Czech Republic",1000,"Former Soviet Union",562,0.562
+"32","Denmark",1000,"Europe",570,0.57
+"33","Dominican Republic",1000,"Americas",565,0.565
+"34","Ecuador",1000,"Americas",635,0.635
+"35","Egypt",1000,"Middle East and North Africa",858,0.858
+"36","El Salvador",1000,"Americas",567,0.567
+"37","Estonia",1000,"Europe",400,0.4
+"38","Eswatini",1000,"Sub-Saharan Africa",563,0.563
+"39","Ethiopia",1000,"Sub-Saharan Africa",847,0.847
+"40","Finland",1000,"Europe",479,0.479
+"41","France",1000,"Europe",296,0.296
+"42","Gabon",1000,"Sub-Saharan Africa",492,0.492
+"43","Georgia",1000,"Asia and Australia",517,0.517
+"44","Germany",1000,"Europe",540,0.54
+"45","Ghana",1000,"Sub-Saharan Africa",567,0.567
+"46","Greece",1000,"Europe",511,0.511
+"47","Guatemala",1000,"Americas",540,0.54
+"48","Guinea",1000,"Sub-Saharan Africa",608,0.608
+"49","Haiti",500,"Americas",292,0.584
+"50","Honduras",1000,"Americas",663,0.663
+"51","Hungary",1000,"Former Soviet Union",702,0.702
+"52","Iceland",500,"Europe",360,0.72
+"53","India",3000,"Asia and Australia",2346,0.782
+"54","Indonesia",1000,"Asia and Australia",334,0.334
+"55","Iran",1005,"Middle East and North Africa",594,0.591044776119403
+"56","Iraq",1000,"Middle East and North Africa",623,0.623
+"57","Ireland",1000,"Europe",644,0.644
+"58","Israel",1010,"Middle East and North Africa",488,0.483168316831683
+"59","Italy",1000,"Europe",531,0.531
+"60","Ivory Coast",1000,"Sub-Saharan Africa",586,0.586
+"61","Japan",1004,"Asia and Australia",138,0.137450199203187
+"62","Jordan",1002,"Middle East and North Africa",721,0.719560878243513
+"63","Kazakhstan",1000,"Asia and Australia",415,0.415
+"64","Kenya",1000,"Sub-Saharan Africa",669,0.669
+"65","Kuwait",1001,"Middle East and North Africa",607,0.606393606393606
+"66","Kyrgyzstan",1000,"Asia and Australia",541,0.541
+"67","Laos",1001,"Asia and Australia",387,0.386613386613387
+"68","Latvia",1021,"Europe",259,0.253672869735553
+"69","Lebanon",1000,"Middle East and North Africa",692,0.692
+"70","Liberia",1000,"Sub-Saharan Africa",545,0.545
+"71","Libya",1003,"Middle East and North Africa",524,0.522432701894317
+"72","Lithuania",1000,"Europe",298,0.298
+"73","Luxembourg",1000,"Europe",430,0.43
+"74","Macedonia",1008,"Europe",493,0.489087301587302
+"75","Madagascar",1000,"Sub-Saharan Africa",642,0.642
+"76","Malawi",1000,"Sub-Saharan Africa",786,0.786
+"77","Malaysia",1000,"Asia and Australia",412,0.412
+"78","Mali",1000,"Sub-Saharan Africa",628,0.628
+"79","Malta",1007,"Europe",539,0.535253227408143
+"80","Mauritania",1000,"Sub-Saharan Africa",604,0.604
+"81","Mauritius",1000,"Sub-Saharan Africa",524,0.524
+"82","Mexico",1034,"Americas",713,0.689555125725339
+"83","Moldova",1000,"Former Soviet Union",277,0.277
+"84","Mongolia",1000,"Asia and Australia",581,0.581
+"85","Montenegro",1000,"Europe",321,0.321
+"86","Morocco",1001,"Middle East and North Africa",637,0.636363636363636
+"87","Mozambique",1000,"Sub-Saharan Africa",562,0.562
+"88","Myanmar",1000,"Asia and Australia",772,0.772
+"89","Namibia",1005,"Sub-Saharan Africa",399,0.397014925373134
+"90","Nepal",1000,"Asia and Australia",542,0.542
+"91","Netherlands",1001,"Europe",359,0.358641358641359
+"92","New Zealand",1002,"Asia and Australia",568,0.56686626746507
+"93","Nicaragua",1000,"Americas",714,0.714
+"94","Niger",1000,"Sub-Saharan Africa",550,0.55
+"95","Nigeria",1000,"Sub-Saharan Africa",594,0.594
+"96","Norway",1000,"Europe",626,0.626
+"97","Pakistan",1000,"Asia and Australia",521,0.521
+"98","Palestinian Territories",1000,"Middle East and North Africa",823,0.823
+"99","Panama",1000,"Americas",583,0.583
+"100","Paraguay",1000,"Americas",509,0.509
+"101","Peru",1000,"Americas",388,0.388
+"102","Philippines",1000,"Asia and Australia",543,0.543
+"103","Poland",1000,"Former Soviet Union",617,0.617
+"104","Portugal",1001,"Europe",409,0.408591408591409
+"105","Republic of Congo",1000,"Sub-Saharan Africa",608,0.608
+"106","Romania",1002,"Former Soviet Union",588,0.586826347305389
+"107","Russia",2000,"Former Soviet Union",728,0.364
+"108","Rwanda",1000,"Sub-Saharan Africa",743,0.743
+"109","Saudi Arabia",1016,"Middle East and North Africa",607,0.59744094488189
+"110","Senegal",1000,"Sub-Saharan Africa",564,0.564
+"111","Serbia",1000,"Europe",528,0.528
+"112","Sierra Leone",1000,"Sub-Saharan Africa",750,0.75
+"113","Singapore",1000,"Asia and Australia",318,0.318
+"114","Slovakia",1000,"Former Soviet Union",597,0.597
+"115","Slovenia",1000,"Europe",456,0.456
+"116","South Africa",1000,"Sub-Saharan Africa",266,0.266
+"117","South Korea",1014,"Asia and Australia",226,0.222879684418146
+"118","Spain",1000,"Europe",627,0.627
+"119","Sri Lanka",1109,"Asia and Australia",548,0.494138863841298
+"120","Sweden",1000,"Europe",536,0.536
+"121","Switzerland",1000,"Europe",306,0.306
+"122","Taiwan",1000,"Asia and Australia",295,0.295
+"123","Tajikistan",1000,"Asia and Australia",827,0.827
+"124","Tanzania",1000,"Sub-Saharan Africa",737,0.737
+"125","Thailand",1000,"Asia and Australia",606,0.606
+"126","The Gambia",1000,"Sub-Saharan Africa",683,0.683
+"127","Togo",1000,"Sub-Saharan Africa",405,0.405
+"128","Tunisia",1001,"Middle East and North Africa",531,0.53046953046953
+"129","Turkey",1000,"Middle East and North Africa",580,0.58
+"130","Turkmenistan",1000,"Asia and Australia",744,0.744
+"131","Uganda",1000,"Sub-Saharan Africa",562,0.562
+"132","Ukraine",1000,"Former Soviet Union",297,0.297
+"133","United Arab Emirates",1005,"Middle East and North Africa",504,0.501492537313433
+"134","United Kingdom",1000,"Europe",597,0.597
+"135","United States",1006,"Americas",611,0.607355864811133
+"136","Uruguay",1000,"Americas",529,0.529
+"137","Uzbekistan",1000,"Asia and Australia",814,0.814
+"138","Venezuela",1000,"Americas",737,0.737
+"139","Vietnam",1012,"Asia and Australia",205,0.202569169960474
+"140","Yemen",1000,"Middle East and North Africa",659,0.659
+"141","Zambia",1000,"Sub-Saharan Africa",528,0.528
+"142","Zimbabwe",1000,"Sub-Saharan Africa",726,0.726
