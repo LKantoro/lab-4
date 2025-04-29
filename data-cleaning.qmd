@@ -399,8 +399,6 @@ barplotdf = wgm2018_full_new2 %>% filter(Q12 %in% c(1,2,3,4)) %>%
 write.csv(wgm2018_full_new2, "wgm2018_full_new2.csv")
 
 
-write.csv(barplotdf, "barplotdf.csv")
-
 
 
 ```
